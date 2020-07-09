@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import octoprint
 import requests
 
+
 class IFTTTplugin(
     octoprint.plugin.StartupPlugin,
     octoprint.plugin.SettingsPlugin,
@@ -20,9 +21,12 @@ class IFTTTplugin(
         makerkeys = self._settings.get(["makerkeys"])
 
         for event in events:
-            if event["event_name"] != event_name: continue
+            self._logger.debug(f"Looking at event {event['event_name']}")
+            if event["event_name"] != event_name:
+                continue
 
-            trigger_names = filter(lambda name: name.strip(), event["trigger_names"])
+            self._logger.debug(f"Event has trigger names: {event['trigger_names']}")
+            trigger_names = list(filter(lambda name: name.strip(), event["trigger_names"]))
 
             if not len(trigger_names):
                 trigger_names = [prefix + event_name for prefix in default_prefixes]
@@ -68,10 +72,10 @@ class IFTTTplugin(
                 sf = s.zfill(2)
                 mf = m.zfill(2)
                 hf = h.zfill(2)
-                
+
                 if value[2] == "$":
                     return to_thunk('%s:%s:%s' % (hf, mf, sf))
-                    
+
                 if value[2] == ":":
                     return to_thunk('%s:%s' % (hf, mf))
 
@@ -127,6 +131,7 @@ class IFTTTplugin(
         )
 
 __plugin_name__ = "OctoPrint-IFTTT"
+__plugin_pythoncompat__ = ">=3,<4"
 
 def __plugin_load__():
     global __plugin_implementation__
